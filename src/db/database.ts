@@ -42,6 +42,14 @@ export interface Departement {
   updatedAt: string
 }
 
+export interface ZoomLink {
+  id?: number
+  titre: string
+  url: string
+  meetingId?: string
+  createdAt: string
+}
+
 export type UserRole = 'admin' | 'user'
 
 export interface AppUser {
@@ -74,6 +82,7 @@ export class AppDatabase extends Dexie {
   annonces!: Table<Annonce>
   departements!: Table<Departement>
   users!: Table<AppUser>
+  zoomLinks!: Table<ZoomLink>
 
   constructor() {
     super('RoyalMinistryDB')
@@ -87,6 +96,13 @@ export class AppDatabase extends Dexie {
       annonces: '++id, date',
       departements: '++id, &cle',
       users: '++id, &username'
+    })
+    this.version(3).stores({
+      services: '++id, &date',
+      annonces: '++id, date',
+      departements: '++id, &cle',
+      users: '++id, &username',
+      zoomLinks: '++id'
     })
   }
 }
@@ -103,6 +119,18 @@ export async function seedDepartements() {
       { cle: 'femmes', nom: 'Femmes', responsable: '', updatedAt: now },
       { cle: 'groupe_musical', nom: 'Groupe Musical', responsable: '', updatedAt: now }
     ])
+  }
+}
+
+export async function seedZoomLinks() {
+  const count = await db.zoomLinks.count()
+  if (count === 0) {
+    await db.zoomLinks.add({
+      titre: 'Culte dominical',
+      url: 'https://us02web.zoom.us/j/84214624356?pwd=UkU0SDJJQ1lXOWtGR29BUjlJWWJ5Zz09',
+      meetingId: '842 1462 4356',
+      createdAt: new Date().toISOString(),
+    })
   }
 }
 

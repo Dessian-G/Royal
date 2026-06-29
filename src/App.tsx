@@ -2,7 +2,7 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { LanguageProvider } from './i18n/LanguageContext'
 import { AuthProvider, useAuth } from './auth/AuthContext'
 import { useEffect } from 'react'
-import { seedDepartements, seedAdmin } from './db/database'
+import { seedDepartements, seedAdmin, seedZoomLinks } from './db/database'
 import Header from './components/Header'
 import Login from './pages/Login'
 import Dashboard from './pages/Dashboard'
@@ -22,6 +22,7 @@ function AppContent() {
   useEffect(() => {
     seedDepartements()
     seedAdmin()
+    seedZoomLinks()
   }, [])
 
   if (!isLoggedIn) {
