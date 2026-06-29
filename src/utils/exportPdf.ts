@@ -1,40 +1,27 @@
 import jsPDF from 'jspdf'
 import autoTable from 'jspdf-autotable'
-import { type Service, getTotalPresents, getTotalFinances } from '../db/database'
+import { type DbService, getTotalPresents, getTotalFinances } from '../lib/dataService'
 
-export function generateMonthlyPdf(
-  services: Service[],
-  moisNom: string,
-  annee: number,
-  t: Record<string, any>
-) {
+export function generateMonthlyPdf(services: DbService[], moisNom: string, annee: number, t: Record<string, any>) {
   const doc = new jsPDF()
   const pageWidth = doc.internal.pageSize.getWidth()
 
-  // En-tête
-  doc.setFillColor(30, 27, 75) // indigo-950
+  doc.setFillColor(30, 27, 75)
   doc.rect(0, 0, pageWidth, 35, 'F')
-
-  doc.setTextColor(212, 175, 55) // gold
+  doc.setTextColor(212, 175, 55)
   doc.setFontSize(16)
   doc.text('ROYAL MINISTRY OF ALL NATIONS', pageWidth / 2, 15, { align: 'center' })
-
   doc.setTextColor(255, 255, 255)
   doc.setFontSize(12)
   doc.text(`${t.rapport.title} — ${moisNom} ${annee}`, pageWidth / 2, 27, { align: 'center' })
 
   let y = 45
 
-  // Tableau des services
   const tableData = services.map(s => [
     new Date(s.date + 'T00:00:00').toLocaleDateString('fr-FR', { day: '2-digit', month: 'short' }),
-    s.adultesHommes.toString(),
-    s.adultesFemmes.toString(),
-    s.enfantsGarcons.toString(),
-    s.enfantsFilles.toString(),
-    getTotalPresents(s).toString(),
-    s.predicateur || '',
-    s.themeMessage || '',
+    s.adultes_hommes.toString(), s.adultes_femmes.toString(),
+    s.enfants_garcons.toString(), s.enfants_filles.toString(),
+    getTotalPresents(s).toString(), s.predicateur || '', s.theme_message || '',
   ])
 
   autoTable(doc, {
@@ -44,122 +31,78 @@ export function generateMonthlyPdf(
     headStyles: { fillColor: [30, 27, 75], fontSize: 8 },
     bodyStyles: { fontSize: 7 },
     alternateRowStyles: { fillColor: [250, 247, 242] },
-    columnStyles: {
-      0: { cellWidth: 18 },
-      5: { fontStyle: 'bold' },
-      6: { cellWidth: 25 },
-      7: { cellWidth: 35 },
-    },
+    columnStyles: { 0: { cellWidth: 18 }, 5: { fontStyle: 'bold' }, 6: { cellWidth: 25 }, 7: { cellWidth: 35 } },
     margin: { left: 10, right: 10 },
   })
 
   y = (doc as any).lastAutoTable.finalY + 10
 
-  // Synthèse présences
   const totalPresents = services.reduce((s, sv) => s + getTotalPresents(sv), 0)
   const moy = services.length ? Math.round(totalPresents / services.length) : 0
 
-  doc.setFontSize(11)
-  doc.setTextColor(30, 27, 75)
-  doc.text(`${t.rapport.presences}`, 10, y)
-  y += 7
+  doc.setFontSize(11); doc.setTextColor(30, 27, 75)
+  doc.text(`${t.rapport.presences}`, 10, y); y += 7
   doc.setFontSize(9)
-  doc.text(`${t.rapport.nbDimanches}: ${services.length}    |    ${t.rapport.totalGeneral}: ${totalPresents}    |    ${t.rapport.moyenne}: ${moy}`, 10, y)
-  y += 10
+  doc.text(`${t.rapport.nbDimanches}: ${services.length}    |    ${t.rapport.totalGeneral}: ${totalPresents}    |    ${t.rapport.moyenne}: ${moy}`, 10, y); y += 10
 
-  // Synthèse finances
   const totalOff = services.reduce((s, sv) => s + (sv.offrandes || 0), 0)
   const totalDim = services.reduce((s, sv) => s + (sv.dimes || 0), 0)
-  const totalAut = services.reduce((s, sv) => s + (sv.autresDons || 0), 0)
+  const totalAut = services.reduce((s, sv) => s + (sv.autres_dons || 0), 0)
   const totalCol = totalOff + totalDim + totalAut
   const devise = services[0]?.devise || 'FCFA'
 
-  doc.setFontSize(11)
-  doc.text(`${t.rapport.finances}`, 10, y)
-  y += 7
-  doc.setFontSize(9)
-
-  const financeData = [
-    [`${t.rapport.totalOffrandes}: ${totalOff.toLocaleString()} ${devise}`],
-    [`${t.rapport.totalDimes}: ${totalDim.toLocaleString()} ${devise}`],
-    [`${t.rapport.totalAutresDons}: ${totalAut.toLocaleString()} ${devise}`],
-    [`${t.rapport.totalCollecte}: ${totalCol.toLocaleString()} ${devise}`],
-  ]
+  doc.setFontSize(11); doc.text(`${t.rapport.finances}`, 10, y); y += 7; doc.setFontSize(9)
 
   autoTable(doc, {
     startY: y,
-    body: financeData,
-    bodyStyles: { fontSize: 9 },
-    alternateRowStyles: { fillColor: [250, 247, 242] },
-    margin: { left: 10, right: 10 },
-    theme: 'plain',
+    body: [
+      [`${t.rapport.totalOffrandes}: ${totalOff.toLocaleString()} ${devise}`],
+      [`${t.rapport.totalDimes}: ${totalDim.toLocaleString()} ${devise}`],
+      [`${t.rapport.totalAutresDons}: ${totalAut.toLocaleString()} ${devise}`],
+      [`${t.rapport.totalCollecte}: ${totalCol.toLocaleString()} ${devise}`],
+    ],
+    bodyStyles: { fontSize: 9 }, alternateRowStyles: { fillColor: [250, 247, 242] },
+    margin: { left: 10, right: 10 }, theme: 'plain',
   })
 
   y = (doc as any).lastAutoTable.finalY + 10
-
-  // Messages
   if (y > 250) { doc.addPage(); y = 20 }
 
-  doc.setFontSize(11)
-  doc.setTextColor(30, 27, 75)
-  doc.text(`${t.rapport.messages}`, 10, y)
-  y += 7
-
-  doc.setFontSize(8)
+  doc.setFontSize(11); doc.setTextColor(30, 27, 75); doc.text(`${t.rapport.messages}`, 10, y); y += 7; doc.setFontSize(8)
   services.forEach(s => {
     if (y > 275) { doc.addPage(); y = 20 }
-    if (s.themeMessage) {
-      doc.text(`• ${s.themeMessage}${s.texteBiblique ? ` (${s.texteBiblique})` : ''}`, 12, y)
-      y += 5
-    }
+    if (s.theme_message) { doc.text(`• ${s.theme_message}${s.texte_biblique ? ` (${s.texte_biblique})` : ''}`, 12, y); y += 5 }
   })
 
-  // Pied de page
   const pageCount = doc.getNumberOfPages()
   for (let i = 1; i <= pageCount; i++) {
-    doc.setPage(i)
-    doc.setFontSize(7)
-    doc.setTextColor(120)
-    doc.text(
-      `Royal Ministry of All Nations — ${new Date().toLocaleDateString('fr-FR')}`,
-      pageWidth / 2,
-      doc.internal.pageSize.getHeight() - 8,
-      { align: 'center' }
-    )
+    doc.setPage(i); doc.setFontSize(7); doc.setTextColor(120)
+    doc.text(`Royal Ministry of All Nations — ${new Date().toLocaleDateString('fr-FR')}`, pageWidth / 2, doc.internal.pageSize.getHeight() - 8, { align: 'center' })
   }
 
   doc.save(`rapport-${moisNom.toLowerCase()}-${annee}.pdf`)
 }
 
-export function generateAllServicesPdf(services: Service[]) {
+export function generateAllServicesPdf(services: DbService[]) {
   const doc = new jsPDF()
   const pageWidth = doc.internal.pageSize.getWidth()
 
-  doc.setFillColor(30, 27, 75)
-  doc.rect(0, 0, pageWidth, 30, 'F')
-  doc.setTextColor(212, 175, 55)
-  doc.setFontSize(14)
+  doc.setFillColor(30, 27, 75); doc.rect(0, 0, pageWidth, 30, 'F')
+  doc.setTextColor(212, 175, 55); doc.setFontSize(14)
   doc.text('ROYAL MINISTRY OF ALL NATIONS', pageWidth / 2, 12, { align: 'center' })
-  doc.setTextColor(255, 255, 255)
-  doc.setFontSize(10)
+  doc.setTextColor(255, 255, 255); doc.setFontSize(10)
   doc.text('Historique des services', pageWidth / 2, 23, { align: 'center' })
-
-  const tableData = services.map(s => [
-    new Date(s.date + 'T00:00:00').toLocaleDateString('fr-FR'),
-    getTotalPresents(s).toString(),
-    s.predicateur || '',
-    s.themeMessage || '',
-    `${getTotalFinances(s).toLocaleString()} ${s.devise}`,
-  ])
 
   autoTable(doc, {
     startY: 38,
     head: [['Date', 'Présents', 'Prédicateur', 'Thème', 'Finances']],
-    body: tableData,
-    headStyles: { fillColor: [30, 27, 75], fontSize: 9 },
-    bodyStyles: { fontSize: 8 },
-    alternateRowStyles: { fillColor: [250, 247, 242] },
-    margin: { left: 10, right: 10 },
+    body: services.map(s => [
+      new Date(s.date + 'T00:00:00').toLocaleDateString('fr-FR'),
+      getTotalPresents(s).toString(), s.predicateur || '', s.theme_message || '',
+      `${getTotalFinances(s).toLocaleString()} ${s.devise}`,
+    ]),
+    headStyles: { fillColor: [30, 27, 75], fontSize: 9 }, bodyStyles: { fontSize: 8 },
+    alternateRowStyles: { fillColor: [250, 247, 242] }, margin: { left: 10, right: 10 },
   })
 
   doc.save('historique-services.pdf')
