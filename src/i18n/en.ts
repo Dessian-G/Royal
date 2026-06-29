@@ -11,6 +11,7 @@ export const en = {
     statistiques: 'Statistics',
     rapport: 'Monthly Report',
     parametres: 'Settings',
+    zoom: 'Zoom Meeting',
     utilisateurs: 'Users',
     deconnexion: 'Logout',
   },

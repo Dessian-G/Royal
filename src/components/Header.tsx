@@ -1,7 +1,7 @@
 import { Link, useLocation } from 'react-router-dom'
 import { useLanguage } from '../i18n/LanguageContext'
 import { useAuth } from '../auth/AuthContext'
-import { Home, Users, Megaphone, Building2, BarChart3, Settings, FileText, LogOut, ShieldCheck } from 'lucide-react'
+import { Home, Users, Megaphone, Building2, BarChart3, Settings, FileText, LogOut, ShieldCheck, Video } from 'lucide-react'
 import { useState } from 'react'
 
 export default function Header() {
@@ -17,6 +17,7 @@ export default function Header() {
     { to: '/departements', label: t.nav.departements, icon: Building2 },
     { to: '/statistiques', label: t.nav.statistiques, icon: BarChart3 },
     { to: '/rapport', label: t.nav.rapport, icon: FileText },
+    { to: '/zoom', label: t.nav.zoom, icon: Video },
     { to: '/parametres', label: t.nav.parametres, icon: Settings },
     ...(isAdmin ? [{ to: '/utilisateurs', label: t.nav.utilisateurs, icon: ShieldCheck }] : []),
   ]

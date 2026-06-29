@@ -11,6 +11,7 @@ export const fr = {
     statistiques: 'Statistiques',
     rapport: 'Rapport mensuel',
     parametres: 'Paramètres',
+    zoom: 'Réunion Zoom',
     utilisateurs: 'Utilisateurs',
     deconnexion: 'Déconnexion',
   },

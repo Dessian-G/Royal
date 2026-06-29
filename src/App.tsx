@@ -14,6 +14,7 @@ import Statistiques from './pages/Statistiques'
 import RapportMensuel from './pages/RapportMensuel'
 import Parametres from './pages/Parametres'
 import GestionUtilisateurs from './pages/GestionUtilisateurs'
+import Zoom from './pages/Zoom'
 
 function AppContent() {
   const { isLoggedIn, isAdmin } = useAuth()
@@ -39,6 +40,7 @@ function AppContent() {
           <Route path="/departements/:cle" element={<DepartementDetail />} />
           <Route path="/statistiques" element={<Statistiques />} />
           <Route path="/rapport" element={<RapportMensuel />} />
+          <Route path="/zoom" element={<Zoom />} />
           <Route path="/parametres" element={isAdmin ? <Parametres /> : <Navigate to="/" />} />
           <Route path="/utilisateurs" element={isAdmin ? <GestionUtilisateurs /> : <Navigate to="/" />} />
           <Route path="*" element={<Navigate to="/" />} />
