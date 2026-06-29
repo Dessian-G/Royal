@@ -9,37 +9,40 @@ export default defineConfig({
     tailwindcss(),
     VitePWA({
       registerType: 'autoUpdate',
-      includeAssets: ['favicon.svg', 'icons/*.png'],
+      includeAssets: ['favicon.svg', 'logo.png', 'icons/*.png'],
       manifest: {
-        name: 'Royal Ministry of All Nations — Gestion d\'Église',
+        name: 'Royal Ministry of All Nations',
         short_name: 'Royal Ministry',
-        description: 'Application de gestion des services dominicaux — Royal Ministry of All Nations',
+        description: 'Gestion des services dominicaux — Temple of Reconciliation',
         theme_color: '#1e1b4b',
         background_color: '#1e1b4b',
         display: 'standalone',
+        orientation: 'portrait',
         scope: '/',
         start_url: '/',
         icons: [
           {
-            src: '/icons/icon-192.png',
-            sizes: '192x192',
-            type: 'image/png'
-          },
-          {
-            src: '/icons/icon-512.png',
+            src: '/logo.png',
             sizes: '512x512',
             type: 'image/png'
           },
           {
-            src: '/icons/icon-512-maskable.png',
+            src: '/logo.png',
             sizes: '512x512',
             type: 'image/png',
             purpose: 'maskable'
+          },
+          {
+            src: '/logo.png',
+            sizes: '192x192',
+            type: 'image/png'
           }
         ]
       },
       workbox: {
         globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2}'],
+        navigateFallback: '/index.html',
+        navigateFallbackDenylist: [/^\/api/],
         runtimeCaching: [
           {
             urlPattern: /^https:\/\/fonts\.googleapis\.com\/.*/i,
