@@ -11,6 +11,8 @@ export const en = {
     statistiques: 'Statistics',
     rapport: 'Monthly Report',
     parametres: 'Settings',
+    utilisateurs: 'Users',
+    deconnexion: 'Logout',
   },
   dashboard: {
     lastSunday: 'Last Sunday',

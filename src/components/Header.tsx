@@ -1,10 +1,12 @@
 import { Link, useLocation } from 'react-router-dom'
 import { useLanguage } from '../i18n/LanguageContext'
-import { Home, Users, Megaphone, Building2, BarChart3, Settings, FileText } from 'lucide-react'
+import { useAuth } from '../auth/AuthContext'
+import { Home, Users, Megaphone, Building2, BarChart3, Settings, FileText, LogOut, ShieldCheck } from 'lucide-react'
 import { useState } from 'react'
 
 export default function Header() {
   const { lang, t, toggleLang } = useLanguage()
+  const { user, isAdmin, logout } = useAuth()
   const location = useLocation()
   const [menuOpen, setMenuOpen] = useState(false)
 
@@ -16,6 +18,7 @@ export default function Header() {
     { to: '/statistiques', label: t.nav.statistiques, icon: BarChart3 },
     { to: '/rapport', label: t.nav.rapport, icon: FileText },
     { to: '/parametres', label: t.nav.parametres, icon: Settings },
+    ...(isAdmin ? [{ to: '/utilisateurs', label: t.nav.utilisateurs, icon: ShieldCheck }] : []),
   ]
 
   return (
@@ -23,17 +26,29 @@ export default function Header() {
       <div className="flex items-center justify-between px-4 py-3">
         <Link to="/" className="flex items-center gap-2 no-underline text-white">
           <img src="/logo.png" alt="Logo" className="w-9 h-9 rounded-full object-cover bg-white" />
-          <div className="leading-tight">
+          <div className="leading-tight hidden sm:block">
             <div className="font-serif font-bold text-sm tracking-wide text-gold">{t.app.name}</div>
           </div>
         </Link>
 
         <div className="flex items-center gap-2">
+          {user && (
+            <span className="text-xs text-white/60 hidden sm:inline">
+              {user.nom}
+            </span>
+          )}
           <button
             onClick={toggleLang}
             className="px-2 py-1 rounded bg-indigo-800 text-xs font-semibold hover:bg-indigo-700 transition-colors cursor-pointer"
           >
             {lang === 'fr' ? 'EN' : 'FR'}
+          </button>
+          <button
+            onClick={logout}
+            className="p-1.5 rounded bg-indigo-800 hover:bg-red-700 transition-colors cursor-pointer"
+            title={t.nav.deconnexion}
+          >
+            <LogOut className="w-4 h-4" />
           </button>
           <button
             onClick={() => setMenuOpen(!menuOpen)}
